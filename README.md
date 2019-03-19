@@ -26,7 +26,7 @@ python3 main.py 'Ссылка на пост с розыгрышем' 'Логин
 ```
 Пример:
 ```bash
-python3 main.py 'https://www.instagram.com/p/BtON034lPhu/' 'beautybar.rus'
+python3 main.py 'https://www.instagram.com/p/draw/' 'username'
 ```
  ### Цель проекта
  Код написать в образовательных целях на онлайн-курсе для веб-разработчиков 
