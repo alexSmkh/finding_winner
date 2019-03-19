@@ -9,7 +9,6 @@ import argparse
 
 
 def get_users_mentioned_two_friends(comments_info):
-    breaker = 0
     users_exist = []
     pattern = '(?:@)([A-Za-z0-9_](?:(?:[A-Za-z0-9_]|(?:\.(?!\.))){0,28}(?:[A-Za-z0-9_]))?)'
     for comment_info in comments_info:
@@ -24,8 +23,6 @@ def get_users_mentioned_two_friends(comments_info):
                 comment_info['user']['username']
             )
         )
-        breaker += 1
-        if breaker > 20: break
     return users_exist
 
 
