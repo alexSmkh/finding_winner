@@ -8,46 +8,53 @@ import re
 import argparse
 
 
-def get_users_mentioned_two_friends(comments_info):
-    users_exist = []
+def get_users_mentioned_two_friends(comments):
+    existing_users = []
+    """
+    regex for instagram username was taken:
+    https://blog.jstassen.com/2016/03/code-regex-for-instagram-username-and-hashtags/
+    """
     pattern = '(?:@)([A-Za-z0-9_](?:(?:[A-Za-z0-9_]|(?:\.(?!\.))){0,28}(?:[A-Za-z0-9_]))?)'
-    for comment_info in comments_info:
-        two_mentioned_users = set(re.findall(pattern, comment_info['text']))
-        if not len(two_mentioned_users) > 1:
+    for comment in comments:
+        mentioned_users = set(re.findall(pattern, comment['text']))
+        """
+        Поясните, пожалуйста, где здесь была ошибка в логике. 
+        Первый if я делал для того, чтобы отсеять пустые или имеющие один элемент
+        множества, чтобы лишний раз не отправлять запрос на сервер.
+        Вторым if-ом проверял существуют ли одновременно оба mentioned_users.
+        """
+        if not is_users_exist(mentioned_users):
             continue
-        if not is_user_exist(two_mentioned_users):
+        if not len(mentioned_users) > 1:
             continue
-        users_exist.append(
+
+        existing_users.append(
             (
-                str(comment_info['user_id']),
-                comment_info['user']['username']
+                str(comment['user_id']),
+                comment['user']['username']
             )
         )
-    return users_exist
+    return existing_users
 
 
-def get_followers(users, post_authors_name):
-    author_id = bot.get_user_id_from_username(post_authors_name)
+def is_users_exist(usernames):
+    return all([True if bot.get_user_id_from_username(username) else False for username in usernames])
+
+
+def get_followers(users, post_author_name):
+    author_id = bot.get_user_id_from_username(post_author_name)
     follower_list = bot.get_user_followers(author_id)
     followers = [user for user in users if user[0] in follower_list]
     return followers
 
 
-def get_users_liked_post(existings_users, media_id):
-    users_id_ = bot.get_media_likers(str(media_id))
+def get_users_liked_post(existing_users, media_id):
+    users_ids = bot.get_media_likers(str(media_id))
     index_for_user_id = 0
-    liked_user = [
-        user for user in existings_users if user[index_for_user_id] in users_id_
+    liked_users = [
+        user for user in existing_users if user[index_for_user_id] in users_ids
     ]
-    return liked_user
-
-
-def is_user_exist(usernames):
-    result = [
-        True if bot.get_user_id_from_username(user_name) else False
-        for user_name in usernames
-    ]
-    return True if result[0] and result[1] else False
+    return liked_users
 
 
 def get_link_post_and_username():
@@ -63,15 +70,15 @@ def get_link_post_and_username():
 if __name__ == '__main__':
     env_patn = join(getcwd(), '.env')
     load_dotenv(env_patn)
-    link_post, post_authors_name = get_link_post_and_username()
+    link_post, post_author_name = get_link_post_and_username()
     login = getenv('LOGIN')
     password = getenv('PASSWORD')
     bot = Bot()
     bot.login(username=login, password=password)
     media_id = bot.get_media_id_from_link(link_post)
-    comments_info = bot.get_media_comments_all(media_id)
-    users_exist = get_users_mentioned_two_friends(comments_info)
+    comments = bot.get_media_comments_all(media_id)
+    users_exist = get_users_mentioned_two_friends(comments)
     users_liked_post = get_users_liked_post(users_exist, media_id)
-    followers = get_followers(users_liked_post, post_authors_name)
+    followers = get_followers(users_liked_post, post_author_name)
     follower_usernames = set(name for id, name in followers)
     print('Наш победитель - {}!'.format(*random.sample(follower_usernames, 1)))
