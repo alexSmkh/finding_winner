@@ -17,15 +17,9 @@ def get_users_mentioned_two_friends(comments):
     pattern = '(?:@)([A-Za-z0-9_](?:(?:[A-Za-z0-9_]|(?:\.(?!\.))){0,28}(?:[A-Za-z0-9_]))?)'
     for comment in comments:
         mentioned_users = set(re.findall(pattern, comment['text']))
-        """
-        Поясните, пожалуйста, где здесь была ошибка в логике. 
-        Первый if я делал для того, чтобы отсеять пустые или имеющие один элемент
-        множества, чтобы лишний раз не отправлять запрос на сервер.
-        Вторым if-ом проверял существуют ли одновременно оба mentioned_users.
-        """
         if not is_users_exist(mentioned_users):
             continue
-        if not len(mentioned_users) > 1:
+        if len(mentioned_users) <= 1:
             continue
 
         existing_users.append(
