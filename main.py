@@ -32,7 +32,7 @@ def get_users_mentioned_two_friends(comments):
 
 
 def is_users_exist(usernames):
-    return all([True if bot.get_user_id_from_username(username) else False for username in usernames])
+    return all([bot.get_user_id_from_username(username) is not None for username in usernames])
 
 
 def get_followers(users, post_author_name):
